@@ -83,16 +83,8 @@ e2e-tests:
   services:
     - name: $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
       alias: app
-<<<<<<< HEAD
-<<<<<<< HEAD
       variables:
         DATABASE_URL: $DATABASE_URL_TEST?$DATABASE_URL_CA
-=======
-      # variables:
-      #   DATABASE_URL: $DATABASE_URL_TEST?sslmode=verify-ca;sslrootcert=ca.pem
->>>>>>> 54ba408 (fix: check test)
-=======
->>>>>>> 52dbbf2 (fix: comment)
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     FF_NETWORK_PER_BUILD: 1
