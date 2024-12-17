@@ -1,0 +1,8 @@
+ca.cert
+db.cred
+example/*
+ca.pem
+.env
+.env.*
+test
+cloud-run-deployer-key.json
