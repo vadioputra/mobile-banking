@@ -36,8 +36,6 @@ build:
     - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA .
     - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
   only:
-    variables:
-      - $pr_num == ""
     refs:
       - main
       - development
