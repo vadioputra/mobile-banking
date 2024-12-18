@@ -22,6 +22,16 @@ stages:
   - test
   - deploy
 
+trigger-from-github:
+  stage: test
+  script:
+    - echo "Triggered from GitHub Pull Request"
+    - echo "Event Type: $EVENT"
+    - echo "GitHub PR Number: $GITHUB_PR_NUMBER"
+  only:
+    variables:
+      - $EVENT == "pr"
+
 
 build:
   image: docker:20.10.16
