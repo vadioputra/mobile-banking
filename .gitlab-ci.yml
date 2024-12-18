@@ -27,14 +27,13 @@ trigger-from-github:
   script:
     - echo "Triggered from GitHub Pull Request"
     - echo "Event Type $ev_num"
-  only:
-    variables:
-      - $ev_num != ""
 
 
 build:
   image: docker:20.10.16
   stage: build
+  rules:
+    - if: $pr_num == ""
   services:
     - docker:20.10.16-dind
   before_script:
@@ -48,6 +47,7 @@ build:
     - main
     - development
     - staging
+
 
 unit-tests:
   stage: test
@@ -119,6 +119,8 @@ deploy-dev:
     - unit-tests
     - integration-tests
     - e2e-tests
+  rules:
+    - if: $pr_num == ""
   before_script:
     - echo $GCLOUD_SERVICE_KEY > service-account.json
     - gcloud auth activate-service-account --key-file service-account.json
@@ -137,6 +139,8 @@ deploy-staging:
     - unit-tests
     - integration-tests
     - e2e-tests
+  rules:
+    - if: $pr_num == ""
   before_script:
     - echo $GCLOUD_SERVICE_KEY > service-account.json
     - gcloud auth activate-service-account --key-file service-account.json
@@ -152,6 +156,8 @@ deploy-staging:
 deploy-prod:
   stage: deploy
   when: manual
+  rules:
+    - if: $pr_num == ""
   needs:
     - unit-tests
     - integration-tests
