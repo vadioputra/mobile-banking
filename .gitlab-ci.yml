@@ -22,6 +22,7 @@ stages:
   - test
   - deploy
 
+
 build:
   image: docker:20.10.16
   stage: build
@@ -39,6 +40,13 @@ build:
     - development
     - staging
 
+trigger-from-github:
+  stage: test
+  script:
+    - echo "Triggered from GitHub Pull Request"
+  only:
+    variables:
+      - $CI_COMMIT_REF_NAME == $GITHUB_HEAD_REF
 
 unit-tests:
   stage: test
@@ -51,8 +59,12 @@ unit-tests:
   only:
     - main
     - merge_requests
+    - triggers
     - development
     - staging
+  except:
+    variables:
+      - $CI_PIPELINE_SOURCE == "external_pull_request_event"
 
 integration-tests:
   stage: test
@@ -154,3 +166,4 @@ deploy-prod:
         --region asia-southeast2 
   only:
     - main
+
