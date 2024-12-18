@@ -19,6 +19,5 @@ jobs:
           debug: true
           project_id: ${{ secrets.GITLAB_PROJECT_ID }}
           ref: ${{ github.head_ref }}
-          variables: |
-            EVENT=pr
-            GITHUB_PR_NUMBER=${{ github.event.pull_request.number }}
+          variables: ev=pr,pr_number=${{ github.event.pull_request.number }}
+  

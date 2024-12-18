@@ -27,11 +27,11 @@ trigger-from-github:
   stage: trig
   script:
     - echo "Triggered from GitHub Pull Request"
-    - echo "Event Type: $EVENT"
+    - echo "Event Type: $ev"
     - echo "GitHub PR Number: $GITHUB_PR_NUMBER"
-  only:
-    variables:
-      - $EVENT == "pr"
+  # only:
+  #   variables:
+  #     - $ev == "pr"
 
 
 build:
