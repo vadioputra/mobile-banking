@@ -9,6 +9,7 @@ variables:
   POSTGRES_USER: user
   POSTGRES_PASSWORD: password
   DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB 
+  pr_num: ""
 # Cache dependencies across jobs
 cache:
   key: ${CI_COMMIT_REF_SLUG}
