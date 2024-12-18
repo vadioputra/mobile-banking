@@ -18,13 +18,12 @@ cache:
 
 stages:
   - prepare
-  - trig
   - build
   - test
   - deploy
 
 trigger-from-github:
-  stage: trig
+  stage: build
   script:
     - echo "Triggered from GitHub Pull Request"
     - echo "Event Type: $ev"
