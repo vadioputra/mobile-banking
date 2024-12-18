@@ -114,8 +114,6 @@ deploy-dev:
     - unit-tests
     - integration-tests
     - e2e-tests
-  rules:
-    - if: $pr_num == ""
   before_script:
     - echo $GCLOUD_SERVICE_KEY > service-account.json
     - gcloud auth activate-service-account --key-file service-account.json
