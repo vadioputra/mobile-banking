@@ -50,14 +50,6 @@ build:
     - development
     - staging
 
-trigger-from-github:
-  stage: test
-  script:
-    - echo "Triggered from GitHub Pull Request"
-  only:
-    variables:
-      - $CI_COMMIT_REF_NAME == $GITHUB_HEAD_REF
-
 unit-tests:
   stage: test
   image: golang:1.21
