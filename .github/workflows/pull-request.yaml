@@ -12,10 +12,11 @@ jobs:
   trigger-gitlab-ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger GitLab CI
+      - name: trigger Job
         uses: ghcr.io/appleboy/gitlab-ci-action@v1.3.0
         with:
-          url: ${{ secrets.GITLAB_URL }}
+          host: "http://gitlab.com"
           token: ${{ secrets.GITLAB_PAT }}
+          debug: true
           project_id: ${{ secrets.GITLAB_PROJECT_ID }}
           ref: ${{ github.head_ref }}
