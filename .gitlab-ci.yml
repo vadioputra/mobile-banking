@@ -28,9 +28,9 @@ trigger-from-github:
     - echo "Triggered from GitHub Pull Request"
     - echo "Event Type $ev"
     - echo "GitHub PR Number $uwuw"
-  # only:
-  #   variables:
-  #     - $ev == "pr"
+  only:
+    variables:
+      - $ev == "pull-request"
 
 
 build:
