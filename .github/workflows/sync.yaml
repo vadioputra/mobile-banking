@@ -14,6 +14,6 @@ jobs:
         uses: actions/checkout@v4
       - uses: keninkujovic/gitlab-sync@2.0.0
         with:
-          gitlab_url: ${{ var.GITLAB_URL }}
-          username: ${{ var.GITLAB_USERNAME }}
-          gitlab_pat: ${{ var.GITLAB_TOKEN }}
+          gitlab_url: ${{ vars.GITLAB_URL }}
+          username: ${{ vars.GITLAB_USERNAME }}
+          gitlab_pat: ${{ vars.GITLAB_TOKEN }}
