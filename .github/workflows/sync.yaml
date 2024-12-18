@@ -1,0 +1,19 @@
+name: Sync to gitlab CI
+on:
+  push:
+    branches:
+      - development
+      - staging
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - uses: keninkujovic/gitlab-sync@2.0.0
+        with:
+          gitlab_url: ${{ var.GITLAB_URL }}
+          username: ${{ var.GITLAB_USERNAME }}
+          gitlab_pat: ${{ var.GITLAB_TOKEN }}
