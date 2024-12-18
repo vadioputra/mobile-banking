@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger GitLab CI
-        uses: appleboy/gitlab-ci-trigger-action@master
+        uses: ghcr.io/appleboy/gitlab-ci-action@v1.3.0
         with:
           url: ${{ secrets.GITLAB_URL }}
           token: ${{ secrets.GITLAB_PAT }}
