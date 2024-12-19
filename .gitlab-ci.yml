@@ -89,8 +89,8 @@ e2e-tests:
   services:
     - name: $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
       alias: app
-      variables:
-        DATABASE_URL: $DATABASE_URL_TEST?$DATABASE_URL_CA
+      # variables:
+      #   DATABASE_URL: $DATABASE_URL_TEST?$DATABASE_URL_CA
   variables:
     POSTGRES_HOST_AUTH_METHOD: trust
     FF_NETWORK_PER_BUILD: 1
