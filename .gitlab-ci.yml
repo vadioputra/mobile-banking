@@ -1,7 +1,6 @@
 # image: golang:1.21-alpine
 
 variables:
-  REPO_NAME: mobile-banking-backend
   GO111MODULE: "on"
   GOPATH: "$CI_PROJECT_DIR/.go"
   CACHE_DIR: "$CI_PROJECT_DIR/.cache"
