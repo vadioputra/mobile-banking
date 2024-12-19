@@ -24,27 +24,6 @@ stages:
   - notify
 
 
-.update_github_status: &update_github_status |
-  curl -X POST \
-    -H "Accept: application/vnd.github.v3+json" \
-    -H "Authorization: token ${GITHUB_TOKEN}" \
-    https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/statuses/${CI_COMMIT_SHA} \
-    -d '{
-      "state": "'"${STATUS}"'",
-      "target_url": "'"${CI_PIPELINE_URL}"'",
-      "description": "'"${DESCRIPTION}"'",
-      "context": "ci/gitlab/gitlab.com"
-    }'
-
-notify_pending:
-  stage: .pre
-  variables:
-    GIT_STRATEGY: none
-    STATUS: "pending"
-    DESCRIPTION: "Pipeline is running on GitLab"
-  script:
-    - *update_github_status
-
 build:
   image: docker:20.10.16
   stage: build
@@ -190,4 +169,17 @@ deploy-prod:
       - $pr_num == ""
     refs:
       - main
+
+update_status:
+  stage: notify
+  script:
+    - | 
+      curl -X POST \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      -d '{"state": "success", "description": "Pipeline succeeded", "context": "GitLab CI/CD"}' \
+      https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/statuses/$CI_COMMIT_SHA
+  only:
+    variables:
+      - $pr_num != ""
 
