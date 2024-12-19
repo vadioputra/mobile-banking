@@ -192,7 +192,7 @@ deploy-prod:
       - main
 
 set_status_job:
-  stage: set_status
+  stage: notify
   script:
     - echo "Setting GitHub PR status..."
     - |
