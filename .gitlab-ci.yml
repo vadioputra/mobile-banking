@@ -178,13 +178,17 @@ github-pr-notification:
       # Check if this is a merge request
       if [ -n "$CI_MERGE_REQUEST_IID" ]; then
         ALL_JOBS_PASSED=true
+        
         # List of jobs to check
         JOBS_TO_CHECK=("unit-tests" "integration-tests" "build")
         
+        # Check each job status
         for job in "${JOBS_TO_CHECK[@]}"; do
-          if ! curl -s --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
-              "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/jobs" | \
-              jq -e ".[] | select(.name == \"$job\" and .status != \"success\")"; then
+          JOB_STATUS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" \
+            "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/jobs" | \
+            jq -e ".[] | select(.name == \"$job\") | .status" | tr -d '"')
+            
+          if [ "$JOB_STATUS" != "success" ]; then
             ALL_JOBS_PASSED=false
             break
           fi
@@ -192,24 +196,36 @@ github-pr-notification:
         
         # If all jobs passed, send GitHub PR comment
         if [ "$ALL_JOBS_PASSED" = true ]; then
-          PR_COMMENT="✅ All checks have passed for merge request #$CI_MERGE_REQUEST_IID
+          PR_COMMENT=$(cat <<EOF
+            ✅ All checks have passed for merge request #$CI_MERGE_REQUEST_IID
 
-          Checks completed:
-          - Unit Tests ✓
-          - Integration Tests ✓
-          - Build ✓
+            **Checks completed:**
+            - Unit Tests ✓
+            - Integration Tests ✓
+            - Build ✓
 
-          Pipeline Details:
-          - Commit: $CI_COMMIT_SHORT_SHA
-          - Branch: $CI_COMMIT_REF_NAME
-          - Pipeline URL: $CI_PIPELINE_URL"
-          
+            **Pipeline Details:**
+            - Commit: $CI_COMMIT_SHORT_SHA
+            - Branch: $CI_COMMIT_REF_NAME
+            - [Pipeline URL]($CI_PIPELINE_URL)
+          EOF)
           # Send notification to GitHub using GitHub API
-          curl -X POST \
+          GITHUB_API_URL="https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/issues/$pr_number/comments"
+          
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/issues/$pr_number/comments" \
-            -d "{\"body\": \"$PR_COMMENT\"}"
+            "$GITHUB_API_URL" \
+            -d "{\"body\": \"$PR_COMMENT\"}")
+          
+          if [ "$RESPONSE" -ne 201 ]; then
+            echo "Failed to send PR comment to GitHub. HTTP status code: $RESPONSE"
+            exit 1
+          else
+            echo "PR comment successfully sent to GitHub."
+          fi
+        else
+          echo "Not all jobs passed. Skipping GitHub PR comment."
         fi
       fi
 
