@@ -191,24 +191,3 @@ deploy-prod:
     refs:
       - main
 
-set_status_job:
-  stage: notify
-  script:
-    - echo "Setting GitHub PR status..."
-    - |
-      curl -X POST \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-              "state": "success",
-              "target_url": "'$CI_JOB_URL'",
-              "description": "CI job status from GitLab",
-              "context": "gitlab-ci"
-            }' \
-        "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/statuses/$CI_COMMIT_SHA"
-  dependencies:
-    - test_job
-  only:
-    variables:
-      - $pr_num != ""
-  allow_failure: true
