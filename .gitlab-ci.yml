@@ -177,7 +177,7 @@ update_status:
       curl -X POST \
       -H "Authorization: token $GITHUB_TOKEN" \
       -H "Accept: application/vnd.github.v3+json" \
-      -d '{"state": "success", "description": "Pipeline succeeded", "context": "GitLab CI/CD"}' \
+      -d '{"state": "success", "description": "Pipeline succeeded", "context": "ci/gitlab/gitlab.com"}' \
       https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/statuses/$CI_COMMIT_SHA
   # only:
   #   variables:
