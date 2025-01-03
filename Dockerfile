@@ -28,7 +28,5 @@ EXPOSE 80
 
 RUN touch .env
 
-COPY ca.pem .
-
 # Command to run the executable
 CMD ["./mobile-banking"]
