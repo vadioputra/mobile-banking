@@ -130,7 +130,7 @@ deploy-staging:
     - gcloud config set project $GCP_PROJECT_ID
   image: google/cloud-sdk:stable
   script:
-    - gcloud run deploy $SERVICE_NAME_STAGING
+    - gcloud run deploy $SERVICE_NAME
         --image $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
         --region asia-southeast2 
   only:
