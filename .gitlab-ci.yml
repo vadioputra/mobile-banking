@@ -9,12 +9,6 @@ variables:
   POSTGRES_PASSWORD: password
   DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB 
   pr_num: ""
-# Cache dependencies across jobs
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .go/pkg/mod
-    - vendor/
 
 stages:
   - prepare
@@ -23,6 +17,11 @@ stages:
   - deploy
   - notify
 
+update_status:
+  stage: build
+  
+  script:
+    - echo "Hello"
 
 # build:
 #   image: docker:20.10.16
@@ -48,7 +47,7 @@ stages:
 #   script:
 #     - echo "Testing with Go ${GO_VERSION} on ${OS} with ${DATABASE}"
 #     - go mod download
-#     - go test ./tests/unit/... -v
+#     - go est ./tests/unit/... -v
 #   allow_failure: true
 #   only:
 #     - main
@@ -170,15 +169,16 @@ stages:
 #     refs:
 #       - main
 
-update_status:
-  stage: notify
-  script:
-    - | 
-      curl -X POST \
-      -H "Authorization: token $GITHUB_TOKEN" \
-      -H "Accept: application/vnd.github.v3+json" \
-      -d '{"state": "success", "description": "Pipeline succeeded", "context": "ci/gitlab/gitlab.com"}' \
-      https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/statuses/$CI_COMMIT_SHA
+# update_status:
+#   stage: notify
+  
+#   script:
+#     - | 
+#       curl -X POST \
+#       -H "Authorization: token $GITHUB_TOKEN" \
+#       -H "Accept: application/vnd.github.v3+json" \
+#       -d '{"state": "success", "description": "Pipeline succeeded", "context": "🦊 GitLab CI/CD"}' \
+#       https://api.github.com/repos/$GITHUB_OWNER/$SERVICE_NAME/statuses/$CI_COMMIT_SHA
   # only:
   #   variables:
   #     - $pr_num != ""
