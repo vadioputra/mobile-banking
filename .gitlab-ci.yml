@@ -41,7 +41,7 @@ unit-tests:
   script:
     - echo "Testing with Go ${GO_VERSION} on ${OS} with ${DATABASE}"
     - go mod download
-    - go est ./tests/unit/... -v
+    - go test ./tests/unit/... -v
   allow_failure: true
   only:
     - main
