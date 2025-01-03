@@ -21,7 +21,7 @@ update_status:
   stage: build
   
   script:
-    - echo "Hello"
+    - echo "Hello yes"
 
 # build:
 #   image: docker:20.10.16
