@@ -38,6 +38,8 @@ build:
 unit-tests:
   stage: test
   image: golang:1.21
+  needs:
+    - build
   script:
     - echo "Testing with Go ${GO_VERSION} on ${OS} with ${DATABASE}"
     - go mod download
@@ -56,6 +58,8 @@ unit-tests:
 integration-tests:
   stage: test
   image: golang:1.21
+  needs:
+    - build
   services:
     - name: postgres:13
       alias: postgres
