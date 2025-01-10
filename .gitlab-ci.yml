@@ -34,9 +34,9 @@ build:
     - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE:cache
   only:
-    - main
-    - development
-    - merge_requests
+    refs:
+      - development
+      - main
 
 
 sast:
@@ -126,7 +126,11 @@ deploy-dev:
         --image $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
         --region asia-southeast2 
   only:
-    - development
+    variables:
+      - $pr_num == ""
+    refs:
+      - development
+
 
 
 deploy-prod:
@@ -145,4 +149,7 @@ deploy-prod:
         --image $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
         --region asia-southeast2 
   only:
-    - main
+    variables:
+      - $pr_num == ""
+    refs:
+      - main
