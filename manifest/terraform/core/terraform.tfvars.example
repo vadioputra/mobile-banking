@@ -1,0 +1,7 @@
+project_id      = ""
+
+############# main branch ############
+image           = ""
+
+############# development branch ############
+image_development           = ""
