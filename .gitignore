@@ -1,8 +1,8 @@
-ca.cert
-db.cred
-example/*
-ca.pem
-.env
-.env.*
-test
+bank.db
 cloud-run-deployer-key.json
+manifest/terraform/core/terraform.tfvars
+manifest/terraform/core/.terraform
+manifest/terraform/core/.terraform.lock.hcl
+manifest/terraform/core/terraform.tfstate.backup
+manifest/terraform/core/terraform.tfstate
+manifest/terraform/core/cloud-run-deployer.json

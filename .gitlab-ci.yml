@@ -1,24 +1,13 @@
-# image: golang:1.21-alpine
-
 variables:
-  REPO_NAME: mobile-banking-backend
-  GO111MODULE: "on"
-  GOPATH: "$CI_PROJECT_DIR/.go"
-  CACHE_DIR: "$CI_PROJECT_DIR/.cache"
-  POSTGRES_DB: mobile_banking
-  POSTGRES_USER: user
-  POSTGRES_PASSWORD: password
-  DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB 
-# Cache dependencies across jobs
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .go/pkg/mod
-    - vendor/
+  SAST_IMAGE_SUFFIX: '-fips'
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
 
 stages:
-  - prepare
   - build
+  - security
   - test
   - deploy
 
@@ -27,17 +16,57 @@ build:
   stage: build
   services:
     - docker:20.10.16-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_BUILDKIT: 1
+    BUILDKIT_INLINE_CACHE: 1
   before_script:
     - docker info
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
-    - echo $CA > ca.pem
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .docker_cache/
   script:
-    - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - mkdir -p .docker_cache
+    - docker build --cache-from=$DOCKER_IMAGE:cache -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker tag $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA $DOCKER_IMAGE:cache
     - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_IMAGE:cache
   only:
     - main
     - development
-    - staging
+    - merge_requests
+
+
+sast:
+  stage: security
+  artifacts:
+    reports:
+      sast: gl-sast-report.json 
+    paths:
+      - gl-sast-report.json     
+    expire_in: 1 week    
+
+# owasp_dependency_check:
+#   image:
+#     name: registry.gitlab.com/gitlab-ci-utils/docker-dependency-check:latest
+#     entrypoint: [""]
+#   needs:
+#     - build
+#   script:
+#     - >
+#       /usr/share/dependency-check/bin/dependency-check.sh --scan "./" --format ALL
+#       --project "$CI_PROJECT_NAME" --failOnCVSS 0
+#   allow_failure: true
+#   only:
+#     - main
+#     - development
+#     - staging
+#   artifacts:
+#     when: always
+#     paths:
+#       - "./dependency-check-report.html"
 
 
 unit-tests:
@@ -52,28 +81,18 @@ unit-tests:
     - main
     - merge_requests
     - development
-    - staging
 
 integration-tests:
   stage: test
   image: golang:1.21
-  services:
-    - name: postgres:13
-      alias: postgres
-  variables:
-    POSTGRES_HOST_AUTH_METHOD: trust
   before_script:
-    - apt-get update && apt-get install -y postgresql-client
     - go mod download
   script:
-    - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 'OK' AS status;"
-    - export DATABASE_URL="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB"
     - go test ./tests/integration/... -v
   only:
     - merge_requests
     - main
     - development
-    - staging
 
 e2e-tests:
   stage: test
@@ -83,21 +102,12 @@ e2e-tests:
   services:
     - name: $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
       alias: app
-      variables:
-        DATABASE_URL: $DATABASE_URL_TEST?$DATABASE_URL_CA
-  variables:
-    POSTGRES_HOST_AUTH_METHOD: trust
-    FF_NETWORK_PER_BUILD: 1
-    DATABASE_URL: $DATABASE_URL_TEST?$DATABASE_URL_CA
   before_script:
-    - apt-get update && apt-get install -y postgresql-client
     - go mod download
   script:
-    - export ServerAddress="http://app:8080"
     - go test ./tests/e2e/... -v
   only:
     - development
-    - staging
     - main
 
 deploy-dev:
@@ -118,27 +128,9 @@ deploy-dev:
   only:
     - development
 
-deploy-staging:
-  stage: deploy
-  needs:
-    - unit-tests
-    - integration-tests
-    - e2e-tests
-  before_script:
-    - echo $GCLOUD_SERVICE_KEY > service-account.json
-    - gcloud auth activate-service-account --key-file service-account.json
-    - gcloud config set project $GCP_PROJECT_ID
-  image: google/cloud-sdk:stable
-  script:
-    - gcloud run deploy $SERVICE_NAME_STAGING
-        --image $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
-        --region asia-southeast2 
-  only:
-    - staging
 
 deploy-prod:
   stage: deploy
-  when: manual
   needs:
     - unit-tests
     - integration-tests

@@ -1,4 +1,4 @@
-# Dockerfile
+# Stage 1: Builder
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
@@ -6,16 +6,19 @@ WORKDIR /app
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
+RUN apk update \
+    && apk --no-cache --update add build-base 
+
 # Download dependencies
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o mobile-banking ./cmd/server/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -o mobile-banking main.go
 
-# Final stage
+# Stage 2: Final image
 FROM alpine:latest
 
 WORKDIR /root/
@@ -24,11 +27,9 @@ WORKDIR /root/
 COPY --from=builder /app/mobile-banking .
 
 # Expose port
-EXPOSE 80
+EXPOSE 8080
 
 RUN touch .env
-
-COPY ca.pem .
 
 # Command to run the executable
 CMD ["./mobile-banking"]
